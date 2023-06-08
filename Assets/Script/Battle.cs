@@ -9,7 +9,7 @@ public class Battle : MonoBehaviour
     public GameObject cardModel;
     public static List<Card> DeskCards { get; set; } = new();
     public static List<Card> HandCards { get; set; } = new();
-    int maxMainRoadCount = 4;
+    public static int maxMainRoadCount = 4;
     public static List<CardRegoin> MainRoadRegoins { get; set; } = new();
 
 
@@ -38,7 +38,7 @@ public class Battle : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        DrawBattle();
+
         ////当打出卡牌时
         //if (!IsPlayCardOver)
         //{
@@ -113,14 +113,18 @@ public class Battle : MonoBehaviour
 
         //}
     }
+    private void OnDrawGizmos()
+    {
+        DrawBattle();
+    }
     public void DrawBattle()
     {
         for (int i = 0; i < maxMainRoadCount; i++)
         {
-            Debug.DrawLine(new Vector3(i * 4 - 2, 1, 3), new Vector3(i * 4 + 2, 1, 3), Color.white);
-            Debug.DrawLine(new Vector3(i * 4 - 2, 1, -3), new Vector3(i * 4 + 2, 1, -3), Color.white);
-            Debug.DrawLine(new Vector3(i * 4 - 2, 1, 3), new Vector3(i * 4 - 2, 1, -3), Color.white);
-            Debug.DrawLine(new Vector3(i * 4 + 2, 1, 3), new Vector3(i * 4 + 2, 1, -3), Color.white);
+            Gizmos.DrawLine(new Vector3(i * 4 - 2, 0.1f, +3), new Vector3(i * 4 + 2, 0.1f, +3));
+            Gizmos.DrawLine(new Vector3(i * 4 - 2, 0.1f, -3), new Vector3(i * 4 + 2, 0.1f, -3));
+            Gizmos.DrawLine(new Vector3(i * 4 - 2, 0.1f, +3), new Vector3(i * 4 - 2, 0.1f, -3));
+            Gizmos.DrawLine(new Vector3(i * 4 + 2, 0.1f, +3), new Vector3(i * 4 + 2, 0.1f, -3));
 
             //Debug.DrawLine(new Vector3(i * 4 - 4, 1, 7), new Vector3(i * 4 + 2, 1, 7), Color.red);
             //Debug.DrawLine(new Vector3(i * 4 - 4, 1, 3), new Vector3(i * 4 + 2, 1, 3), Color.red);
@@ -162,7 +166,7 @@ public class Battle : MonoBehaviour
         //    Vector3 targetPos = hitInfo.point;
         //    //Debug.Log("Target Position: " + targetPos);
         //}
-        if (!IsWaitForDeploy)
+        if (IsWaitForDeploy)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
@@ -175,6 +179,8 @@ public class Battle : MonoBehaviour
                     {
                         Debug.Log($"点击了{rank}主区");
                         prePlayCard.Deploy(rank, MainRoadRegoins[rank].MainCards);
+                        IsWaitForDeploy = false;
+                        Battle.prePlayCard = null;
                     }
                     else if (targetPos.z > 3 && targetPos.z < 7)
                     {
@@ -191,6 +197,8 @@ public class Battle : MonoBehaviour
                         {
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].UpRightCards);
                         }
+                        IsWaitForDeploy = false;
+                        Battle.prePlayCard = null;
                     }
                     else if (targetPos.z < -3 && targetPos.z > -7)
                     {
@@ -207,12 +215,19 @@ public class Battle : MonoBehaviour
                         {
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].DownRightCards);
                         }
+                        IsWaitForDeploy = false;
+                        Battle.prePlayCard = null;
+                    }
+                    else
+                    {
+                        Debug.Log("不在可部署范围内");
                     }
                 }
                 else
                 {
                     Debug.Log("不在可部署范围内");
                 }
+               
                 //Debug.Log("Target Position: " + targetPos);
             }
         }

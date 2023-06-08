@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 class GameProgress : MonoBehaviour
@@ -28,6 +29,10 @@ class GameProgress : MonoBehaviour
     async Task BattleStart()
     {
         Battle.MainRoadRegoins.Clear();
+        for (int i = 0; i < Battle.maxMainRoadCount; i++)
+        {
+            Battle.MainRoadRegoins.Add(new CardRegoin());
+        }
         for (int i = 0; i < 30; i++)
         {
             var newCardModel = Instantiate(Battle.Instance.cardModel);
@@ -35,8 +40,10 @@ class GameProgress : MonoBehaviour
             newCardModel.SetActive(true);
             newCardModel.transform.position = new Vector3(3f * i, 0, 0);
             var newCard = newCardModel.GetComponent<Card>();
-            newCard.currentCardState = Card.CardState.OnDeck;
+            newCard.currentCardState = CardState.OnDeck;
 
+            var randomColors = Enumerable.Range(0, 4).Select(i=>(CardColor)Random.Range(0, 3));
+            newCard.AddColor(randomColors.ToArray());
             Battle.DeskCards.Add(newCard);
         }
         await Task.Delay(1000);
@@ -52,7 +59,7 @@ class GameProgress : MonoBehaviour
             Debug.Log("抽一张卡");
 
             var targetCard = Battle.DeskCards[0];
-            targetCard.currentCardState = Card.CardState.OnHand;
+            targetCard.currentCardState = CardState.OnHand;
             Battle.DeskCards.Remove(targetCard);
             Battle.HandCards.Add(targetCard);
         }

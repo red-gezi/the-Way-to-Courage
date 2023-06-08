@@ -2,29 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Card : MonoBehaviour
+public partial class Card : MonoBehaviour
 {
-    //卡牌当前的状态
-    public enum CardState
-    {
-        OnDeck,      //在卡组中,放在卡组位置
-        OnHand,      //在手牌中,放在手牌位置
-        OnPlay,      //选取拖拽阶段，跟随鼠标
-        AfterPlay,   //拖拽放手阶段,放在打出位置
-        OnDeploy,    //生成虚假卡牌在地图生成模拟部署效果
-        AfterDeploy, //在地图真实部署
-    }
-    public enum CardPosType
-    {
-        None,
-        Main,
-        UpLeft,
-        UpCenter,
-        UpRight,
-        DownLeft,
-        DownCenter,
-        DownRight,
-    }
     //在手牌中的顺序
     int HandRank => Battle.HandCards.IndexOf(this);
     //对应的主干道牌在主干道中的顺序
@@ -35,18 +14,8 @@ public class Card : MonoBehaviour
     public bool IsUpRight { get; set; }
     //卡牌是否被选择
     public bool IsCardSelect { get; set; }
-
-    //部署卡牌,参数
-    public void Deploy(int regionRank, List<Card> mainCards)
-    {
-        RegionRank = regionRank;
-        mainCards.Add(this);
-        Battle.IsDeployOver = true;
-    }
-    public CardRegoin BelongCardRegoin { get; set; }
-
+    public CardRegoin BelongCardRegoin => Battle.MainRoadRegoins[RegionRank];
     //自身组对应的主干道牌
-
     public CardState currentCardState;
     public CardPosType currentCardPosType
     {
@@ -87,20 +56,21 @@ public class Card : MonoBehaviour
             }
         }
     }
+    public List<Texture2D> colorTex;
     //四个角的颜色,依次是左上 右上 右下 左下
-    Color[] colors = new Color[4];
+    CardColor[] colors = new CardColor[4];
 
-    Color[] CurrentColors
+    CardColor[] CurrentColors
     {
         get
         {
             if (IsOnMainRoad)
             {
-                return IsUpRight ? new Color[] { colors[2], colors[3], colors[0], colors[1] } : new Color[] { colors[0], colors[1], colors[2], colors[3] };
+                return IsUpRight ? new CardColor[] { colors[2], colors[3], colors[0], colors[1] } : new CardColor[] { colors[0], colors[1], colors[2], colors[3] };
             }
             else
             {
-                return IsUpRight ? new Color[] { colors[3], colors[0], colors[1], colors[2] } : new Color[] { colors[1], colors[2], colors[3], colors[0] };
+                return IsUpRight ? new CardColor[] { colors[3], colors[0], colors[1], colors[2] } : new CardColor[] { colors[1], colors[2], colors[3], colors[0] };
             }
         }
     }
@@ -112,7 +82,7 @@ public class Card : MonoBehaviour
     private void OnMouseExit() => IsCardSelect = false;
     private void OnMouseDown()
     {
-        if (Battle.IsWaitForPlayCard)
+        if (Battle.IsWaitForPlayCard && currentCardState == CardState.OnHand)
         {
             currentCardState = CardState.OnPlay;
             Battle.prePlayCard = this;
@@ -207,8 +177,24 @@ public class Card : MonoBehaviour
                 break;
         }
         //更新卡牌坐标和角度
-        transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 2);
-        transform.eulerAngles = Quaternion.Lerp(Quaternion.Euler(transform.eulerAngles), Quaternion.Euler(targetEuler), Time.deltaTime * 2).eulerAngles;
+        transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 5);
+        transform.eulerAngles = Quaternion.Lerp(Quaternion.Euler(transform.eulerAngles), Quaternion.Euler(targetEuler), Time.deltaTime * 5).eulerAngles;
+    }
+    public void AddColor(CardColor[] colors)
+    {
+        this.colors = colors;
+        for (int i = 0; i < 4; i++)
+        {
+            transform.GetChild(i + 1).GetComponent<Renderer>().material.mainTexture = colorTex[(int)colors[i]];
+        }
+    }
+    //部署卡牌,参数
+    public void Deploy(int regionRank, List<Card> mainCards)
+    {
+        RegionRank = regionRank;
+        mainCards.Add(this);
+        currentCardState = CardState.AfterDeploy;
+        Battle.IsDeployOver = true;
     }
 
 }
