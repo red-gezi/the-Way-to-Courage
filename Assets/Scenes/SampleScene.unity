@@ -330,7 +330,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cardModel: {fileID: 2031529275}
-  maxCardsCount: 0
 --- !u!114 &761927147
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -454,7 +453,7 @@ Transform:
   m_GameObject: {fileID: 1200831397}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.1, z: 0}
-  m_LocalScale: {x: 0.3, y: 1, z: 0.6}
+  m_LocalScale: {x: 0.4, y: 1, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2031529276}
@@ -520,13 +519,14 @@ GameObject:
   m_Component:
   - component: {fileID: 2031529276}
   - component: {fileID: 2031529277}
+  - component: {fileID: 2031529278}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2031529276
 Transform:
   m_ObjectHideFlags: 0
@@ -535,7 +535,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2031529275}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 15, y: 5, z: -6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -556,3 +556,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentCardState: 0
+--- !u!65 &2031529278
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2031529275}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 3.28, y: 0.35, z: 6.19}
+  m_Center: {x: 0, y: 0, z: 0}

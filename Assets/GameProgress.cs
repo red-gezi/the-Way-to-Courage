@@ -11,12 +11,12 @@ class GameProgress : MonoBehaviour
             await TurnStart();
             await DrawCards();
             await WaitForPlayCard();
-            await WaitForSelectCardPos();
-            await CheckMovement();
-            await SettleMovement();
-            await SettleResources();
-            await SettleCardEffects();
-            await TurnEnd();
+            await WaitForDeploy();
+            //await CheckMovement();
+            //await SettleMovement();
+            //await SettleResources();
+            //await SettleCardEffects();
+            //await TurnEnd();
             //达成中断条件，跳出
             if (false)
             {
@@ -27,10 +27,11 @@ class GameProgress : MonoBehaviour
     }
     async Task BattleStart()
     {
-        Battle.MainRoadCards.Clear();
+        Battle.MainRoadRegoins.Clear();
         for (int i = 0; i < 30; i++)
         {
             var newCardModel = Instantiate(Battle.Instance.cardModel);
+            newCardModel.transform.GetChild(0).GetComponent<Renderer>().material.color = Random.ColorHSV();
             newCardModel.SetActive(true);
             newCardModel.transform.position = new Vector3(3f * i, 0, 0);
             var newCard = newCardModel.GetComponent<Card>();
@@ -60,16 +61,19 @@ class GameProgress : MonoBehaviour
     async Task WaitForPlayCard()
     {
         Battle.IsPlayCardOver = false;
+        Battle.IsWaitForPlayCard = true;
         while (!Battle.IsPlayCardOver)
         {
             await Task.Delay(100);
         }
         Debug.Log("卡牌打出完毕");
+        await Task.Delay(1000);
     }
-    async Task WaitForSelectCardPos()
+    async Task WaitForDeploy()
     {
-        Battle.IsSeletCardPosOver = false;
-        while (!Battle.IsSeletCardPosOver)
+        Battle.IsDeployOver = false;
+        Battle.IsWaitForDeploy = true;
+        while (!Battle.IsDeployOver)
         {
             await Task.Delay(100);
         }
