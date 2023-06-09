@@ -7,11 +7,15 @@ public class Battle : MonoBehaviour
     // Start is called before the first frame update
     public static Battle Instance { get; set; }
     public GameObject cardModel;
+
+
     public static List<Card> DeskCards { get; set; } = new();
     public static List<Card> HandCards { get; set; } = new();
     public static int maxMainRoadCount = 4;
     public static List<CardRegoin> MainRoadRegoins { get; set; } = new();
-
+    public static Chara chara;
+    //临时卡牌
+    public static GameObject TempCardModel;
 
     //选择的部署位置
     public static Vector3 seletCardPos;
@@ -22,8 +26,6 @@ public class Battle : MonoBehaviour
     public static bool IsPlayCardOver { get; set; } = true;
     //预打出的牌
     public static Card prePlayCard;
-    //预打出的牌
-    public static Card preDeployCard;
     //处于等待选择部署位置
     public static bool IsWaitForDeploy { get; set; } = false;
     //部署卡牌完毕
@@ -32,6 +34,11 @@ public class Battle : MonoBehaviour
     void Start()
     {
         Instance = this;
+        //创造临时牌
+        TempCardModel=Instantiate(cardModel);
+        TempCardModel.name="Temp";
+        TempCardModel.GetComponent<BoxCollider>().enabled = false;
+        //战斗初始化
         GetComponent<GameProgress>().BattleInit();
     }
 
@@ -113,11 +120,8 @@ public class Battle : MonoBehaviour
 
         //}
     }
+    //绘制部署卡槽
     private void OnDrawGizmos()
-    {
-        DrawBattle();
-    }
-    public void DrawBattle()
     {
         for (int i = 0; i < maxMainRoadCount; i++)
         {
@@ -159,20 +163,13 @@ public class Battle : MonoBehaviour
     }
     private void OnMouseDown()
     {
-        //判断点击位置
-        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //if (Physics.Raycast(ray, out RaycastHit hitInfo))
-        //{
-        //    Vector3 targetPos = hitInfo.point;
-        //    //Debug.Log("Target Position: " + targetPos);
-        //}
         if (IsWaitForDeploy)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
             {
                 Vector3 targetPos = hitInfo.point;
-                if (targetPos.x > -2 && targetPos.x < maxMainRoadCount * 4 + 2)
+                if (targetPos.x > -2 && targetPos.x < (maxMainRoadCount - 1) * 4 + 2)
                 {
                     int rank = (int)(targetPos.x + 2) / 4;
                     if (targetPos.z < 3 && targetPos.z > -3)
@@ -180,16 +177,15 @@ public class Battle : MonoBehaviour
                         Debug.Log($"点击了{rank}主区");
                         prePlayCard.Deploy(rank, MainRoadRegoins[rank].MainCards);
                         IsWaitForDeploy = false;
-                        Battle.prePlayCard = null;
                     }
                     else if (targetPos.z > 3 && targetPos.z < 7)
                     {
                         Debug.Log($"点击了{rank}上区");
-                        if ((targetPos.x + 2) / 4 < 1f / 3)
+                        if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
                         {
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].UpLeftCards);
                         }
-                        else if ((targetPos.x + 2) / 4 < 2f / 3)
+                        else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
                         {
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].UpCenterCards);
                         }
@@ -198,16 +194,15 @@ public class Battle : MonoBehaviour
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].UpRightCards);
                         }
                         IsWaitForDeploy = false;
-                        Battle.prePlayCard = null;
                     }
                     else if (targetPos.z < -3 && targetPos.z > -7)
                     {
                         Debug.Log($"点击了{rank}下区");
-                        if ((targetPos.x + 2) / 4 < 1f / 3)
+                        if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
                         {
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].DownLeftCards);
                         }
-                        else if ((targetPos.x + 2) / 4 < 2f / 3)
+                        else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
                         {
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].DownCenterCards);
                         }
@@ -216,7 +211,6 @@ public class Battle : MonoBehaviour
                             prePlayCard.Deploy(rank, MainRoadRegoins[rank].DownRightCards);
                         }
                         IsWaitForDeploy = false;
-                        Battle.prePlayCard = null;
                     }
                     else
                     {
@@ -227,14 +221,87 @@ public class Battle : MonoBehaviour
                 {
                     Debug.Log("不在可部署范围内");
                 }
-               
-                //Debug.Log("Target Position: " + targetPos);
+
             }
         }
     }
     private void OnMouseOver()
     {
+        if (prePlayCard!=null)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hitInfo))
+            {
+                Vector3 targetPos = hitInfo.point;
+                Debug.Log($"x:{targetPos.x}-{(targetPos.x + 2) % 4 }");
 
+                if (targetPos.x > -2 && targetPos.x < (maxMainRoadCount - 1) * 4 + 2)
+                {
+                    int rank = (int)(targetPos.x + 2) / 4;
+                    var tempCard = TempCardModel.GetComponent<Card>();
+                    if (targetPos.z < 3 && targetPos.z > -3)
+                    {
+                        Debug.Log($"点击了{rank}主区");
+                        tempCard.ShowTempCard(rank, CardPosType.Main);
+                    }
+                    else if (targetPos.z > 3 && targetPos.z < 7)
+                    {
+                        Debug.Log($"点击了{rank}上区");
+                        if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
+                        {
+                            Debug.Log($"点击了{rank}上区左边");
+                            tempCard.ShowTempCard(rank, CardPosType.UpLeft);
 
+                        }
+                        else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
+                        {
+                            Debug.Log($"点击了{rank}上区中间");
+                            tempCard.ShowTempCard(rank, CardPosType.UpCenter);
+
+                        }
+                        else
+                        {
+                            Debug.Log($"点击了{rank}上区右边");
+                            tempCard.ShowTempCard(rank, CardPosType.UpRight);
+
+                        }
+                    }
+                    else if (targetPos.z < -3 && targetPos.z > -7)
+                    {
+                        Debug.Log($"点击了{rank}下区");
+                        if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
+                        {
+                            Debug.Log($"点击了{rank}下区左边");
+                            tempCard.ShowTempCard(rank, CardPosType.DownLeft);
+
+                        }
+                        else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
+                        {
+                            Debug.Log($"点击了{rank}下区中间");
+                            tempCard.ShowTempCard(rank, CardPosType.DownCenter);
+
+                        }
+                        else
+                        {
+                            Debug.Log($"点击了{rank}下区右边");
+                            tempCard.ShowTempCard(rank, CardPosType.DownRight);
+
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("不在可部署范围内");
+                    }
+                }
+                else
+                {
+                    Debug.Log("不在可部署范围内");
+                }
+            }
+        }
+        else
+        {
+            TempCardModel.SetActive(false);
+        }
     }
 }

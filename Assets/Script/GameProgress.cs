@@ -13,7 +13,7 @@ class GameProgress : MonoBehaviour
             await DrawCards();
             await WaitForPlayCard();
             await WaitForDeploy();
-            //await CheckMovement();
+            await WaitForSelectMovement();
             //await SettleMovement();
             //await SettleResources();
             //await SettleCardEffects();
@@ -33,18 +33,26 @@ class GameProgress : MonoBehaviour
         {
             Battle.MainRoadRegoins.Add(new CardRegoin());
         }
+        //生成牌库卡牌
         for (int i = 0; i < 30; i++)
         {
             var newCardModel = Instantiate(Battle.Instance.cardModel);
             newCardModel.transform.GetChild(0).GetComponent<Renderer>().material.color = Random.ColorHSV();
             newCardModel.SetActive(true);
             newCardModel.transform.position = new Vector3(3f * i, 0, 0);
+            newCardModel.name = i.ToString();
             var newCard = newCardModel.GetComponent<Card>();
             newCard.currentCardState = CardState.OnDeck;
 
-            var randomColors = Enumerable.Range(0, 4).Select(i=>(CardColor)Random.Range(0, 3));
+            var randomColors = Enumerable.Range(0, 4).Select(i => (CardColor)Random.Range(0, 3));
             newCard.AddColor(randomColors.ToArray());
             Battle.DeskCards.Add(newCard);
+        }
+        await Task.Delay(1000);
+        //布置主线路卡牌
+        for (int i = 0; i < Battle.maxMainRoadCount; i++)
+        {
+            Battle.DeskCards.FirstOrDefault()?.Deploy(i, Battle.MainRoadRegoins[i].MainCards);
         }
         await Task.Delay(1000);
     }
@@ -85,8 +93,13 @@ class GameProgress : MonoBehaviour
             await Task.Delay(100);
         }
         Debug.Log("位置选择完毕");
+        Battle.TempCardModel.SetActive(false);
     }
-    async Task CheckMovement()
+    /// <summary>
+    /// 选择路径，存在多条
+    /// </summary>
+    /// <returns></returns>
+    async Task WaitForSelectMovement()
     {
         await Task.Delay(100);
     }

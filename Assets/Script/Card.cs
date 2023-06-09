@@ -4,10 +4,13 @@ using UnityEngine;
 
 public partial class Card : MonoBehaviour
 {
+    public int Population { get; set; }
+    public int Supplies { get; set; }
+    public int Treasures { get; set; }
     //在手牌中的顺序
     int HandRank => Battle.HandCards.IndexOf(this);
     //对应的主干道牌在主干道中的顺序
-    int RegionRank = 0;
+    int RegionRank { get; set; } = 0;
     // Start is called before the first frame update
     public bool IsOnMainRoad { get; set; }
     //当向上或者向左时位true
@@ -17,6 +20,8 @@ public partial class Card : MonoBehaviour
     public CardRegoin BelongCardRegoin => Battle.MainRoadRegoins[RegionRank];
     //自身组对应的主干道牌
     public CardState currentCardState;
+    //当卡牌为临时卡时所在的位置
+    public CardPosType tempCardPosType;
     public CardPosType currentCardPosType
     {
         get
@@ -76,7 +81,15 @@ public partial class Card : MonoBehaviour
     }
     Vector3 targetPos = Vector3.zero;
     Vector3 targetEuler = Vector3.zero;
-    void Update() => RefreshCard();
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(1) && Battle.prePlayCard == this)
+        {
+            IsUpRight = !IsUpRight;
+            Battle.TempCardModel.GetComponent<Card>().IsUpRight = IsUpRight;
+        }
+        RefreshCard();
+    }
 
     private void OnMouseEnter() => IsCardSelect = true;
     private void OnMouseExit() => IsCardSelect = false;
@@ -131,43 +144,79 @@ public partial class Card : MonoBehaviour
                 break;
             case CardState.AfterPlay:
                 targetPos = new Vector3(30, 0, 8);
+                targetEuler = new Vector3(0, IsUpRight ? 0 : 180, 0);
                 break;
             case CardState.OnDeploy:
+                Vector3 MainPos = new Vector3(RegionRank * 4, 0, 0);
+                switch (tempCardPosType)
+                {
+                    case CardPosType.None:
+                        break;
+                    case CardPosType.Main:
+                        targetPos = MainPos;
+                        targetEuler = new Vector3(0, IsUpRight ? 0 : 180, 0);
+                        break;
+                    case CardPosType.UpLeft:
+                        targetPos = MainPos + new Vector3(-2f, 0, 5f);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
+                        break;
+                    case CardPosType.UpCenter:
+                        targetPos = MainPos + new Vector3(0, 0, 5f);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
+                        break;
+                    case CardPosType.UpRight:
+                        targetPos = MainPos + new Vector3(2f, 0, 5f);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
+                        break;
+                    case CardPosType.DownLeft:
+                        targetPos = MainPos + new Vector3(2f, 0, -5f);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
+                        break;
+                    case CardPosType.DownCenter:
+                        targetPos = MainPos + new Vector3(0, 0, -5f);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
+                        break;
+                    case CardPosType.DownRight:
+                        targetPos = MainPos + new Vector3(-2f, 0, -5f);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case CardState.AfterDeploy:
-
-                Vector3 MainPos = new Vector3(RegionRank * 4, 0, 0);
+                MainPos = new Vector3(RegionRank * 4, 0, 0);
                 switch (currentCardPosType)
                 {
                     case CardPosType.None:
                         break;
                     case CardPosType.Main:
                         targetPos = MainPos;
-                        targetEuler = new Vector3(0, 0, 0);
+                        targetEuler = new Vector3(0, IsUpRight ? 0 : 180, 0);
                         break;
                     case CardPosType.UpLeft:
                         targetPos = MainPos + new Vector3(-2f, 0, 5f);
-                        targetEuler = new Vector3(0, 90, 0);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
                         break;
                     case CardPosType.UpCenter:
                         targetPos = MainPos + new Vector3(0, 0, 5f);
-                        targetEuler = new Vector3(0, 90, 0);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
                         break;
                     case CardPosType.UpRight:
                         targetPos = MainPos + new Vector3(2f, 0, 5f);
-                        targetEuler = new Vector3(0, 90, 0);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
                         break;
                     case CardPosType.DownLeft:
                         targetPos = MainPos + new Vector3(2f, 0, -5f);
-                        targetEuler = new Vector3(0, 90, 0);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
                         break;
                     case CardPosType.DownCenter:
                         targetPos = MainPos + new Vector3(0, 0, -5f);
-                        targetEuler = new Vector3(0, 90, 0);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
                         break;
                     case CardPosType.DownRight:
                         targetPos = MainPos + new Vector3(-2f, 0, -5f);
-                        targetEuler = new Vector3(0, 90, 0);
+                        targetEuler = new Vector3(0, IsUpRight ? 90 : 270, 0);
                         break;
                     default:
                         break;
@@ -189,12 +238,37 @@ public partial class Card : MonoBehaviour
         }
     }
     //部署卡牌,参数
-    public void Deploy(int regionRank, List<Card> mainCards)
+    public void Deploy(int regionRank, List<Card> regionCards)
     {
+        Debug.Log($"部署卡牌{name}到{regionRank}区+");
+        //清空原来的所属
+        if (Battle.HandCards.Contains(this))
+        {
+            Battle.HandCards.Remove(this);
+        }
+        if (Battle.DeskCards.Contains(this))
+        {
+            Battle.DeskCards.Remove(this);
+        }
+        Battle.prePlayCard = null;
+        //设置新所属
         RegionRank = regionRank;
-        mainCards.Add(this);
+        regionCards.Add(this);
         currentCardState = CardState.AfterDeploy;
         Battle.IsDeployOver = true;
     }
+    public void ShowTempCard(int regionRank, CardPosType cardPosType)
+    {
+        //设置新所属
+        gameObject.SetActive(true);
+        RegionRank = regionRank;
+        tempCardPosType = cardPosType;
+        currentCardState = CardState.OnDeploy;
+
+        //设置卡牌属性
+        Battle.TempCardModel.transform.GetChild(0).GetComponent<Renderer>().material.color = Battle.prePlayCard.transform.GetChild(0).GetComponent<Renderer>().material.color;
+
+    }
+
 
 }
