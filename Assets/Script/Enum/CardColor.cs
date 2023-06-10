@@ -1,4 +1,4 @@
-﻿public enum CardColor
+﻿ public enum CardColor
 {
     Blue,
     Red,
