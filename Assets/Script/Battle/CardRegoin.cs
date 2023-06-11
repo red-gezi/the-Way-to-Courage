@@ -40,4 +40,13 @@ public class CardRegoin
             return null;
         }
     }
+    public void Recycle(CardPosType cardPosType)
+    {
+        GetCardList(cardPosType).ForEach(card =>
+        {
+            card.currentCardState = CardState.OnDeck;
+            Battle.DeskCards.Add(card);
+        });
+        GetCardList(cardPosType).Clear();
+    }
 }

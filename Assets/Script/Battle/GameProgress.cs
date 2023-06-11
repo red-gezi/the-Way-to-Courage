@@ -88,10 +88,19 @@ class GameProgress : MonoBehaviour
         {
             Debug.Log("抽一张卡");
 
-            var targetCard = Battle.DeskCards[0];
-            targetCard.currentCardState = CardState.OnHand;
-            Battle.DeskCards.Remove(targetCard);
-            Battle.HandCards.Add(targetCard);
+            var targetCard = Battle.DeskCards.FirstOrDefault();
+            if (targetCard == null)
+            {
+                Debug.Log("卡牌已抽完");
+
+            }
+            else
+            {
+                Debug.Log("抽一张卡");
+                targetCard.currentCardState = CardState.OnHand;
+                Battle.DeskCards.Remove(targetCard);
+                Battle.HandCards.Add(targetCard);
+            }
         }
         await Task.Delay(100);
     }
@@ -114,10 +123,9 @@ class GameProgress : MonoBehaviour
         IsDeployOver = false;
         TempCard.SetColor(PrePlayCard.colors);
         TempCard.IsUpRight = PrePlayCard.IsUpRight;
-        //Battle.IsWaitForDeploy = true;
         while (!IsDeployOver)
         {
-            if (Input.GetMouseButtonDown(1) && GameProgress.PrePlayCard != null)
+            if (Input.GetMouseButtonDown(1) && PrePlayCard != null)
             {
                 PrePlayCard.IsUpRight = !PrePlayCard.IsUpRight;
                 Battle.TempCardModel.GetComponent<Card>().IsUpRight = PrePlayCard.IsUpRight;
@@ -131,7 +139,7 @@ class GameProgress : MonoBehaviour
                     int rank = (int)(targetPos.x + 2) / 4;
                     if (targetPos.z < 3 && targetPos.z > -3)
                     {
-                        if (Input.GetMouseButtonDown(0))
+                        if (Input.GetMouseButton(0))
                         {
                             PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].MainCards);
                         }
@@ -144,7 +152,7 @@ class GameProgress : MonoBehaviour
                     {
                         if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
                         {
-                            if (Input.GetMouseButtonDown(0))
+                            if (Input.GetMouseButton(0))
                             {
                                 PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpLeftCards);
                             }
@@ -155,7 +163,7 @@ class GameProgress : MonoBehaviour
                         }
                         else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
                         {
-                            if (Input.GetMouseButtonDown(0))
+                            if (Input.GetMouseButton(0))
                             {
                                 PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpCenterCards);
                             }
@@ -166,7 +174,7 @@ class GameProgress : MonoBehaviour
                         }
                         else
                         {
-                            if (Input.GetMouseButtonDown(0))
+                            if (Input.GetMouseButton(0))
                             {
                                 PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpRightCards);
                             }
@@ -180,7 +188,7 @@ class GameProgress : MonoBehaviour
                     {
                         if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
                         {
-                            if (Input.GetMouseButtonDown(0))
+                            if (Input.GetMouseButton(0))
                             {
                                 PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownLeftCards);
                             }
@@ -192,7 +200,7 @@ class GameProgress : MonoBehaviour
                         }
                         else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
                         {
-                            if (Input.GetMouseButtonDown(0))
+                            if (Input.GetMouseButton(0))
                             {
                                 PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownCenterCards);
                             }
@@ -203,7 +211,7 @@ class GameProgress : MonoBehaviour
                         }
                         else
                         {
-                            if (Input.GetMouseButtonDown(0))
+                            if (Input.GetMouseButton(0))
                             {
                                 PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownRightCards);
                             }
@@ -213,9 +221,94 @@ class GameProgress : MonoBehaviour
                             }
                         }
                     }
+
+                    //if (targetPos.z < 3 && targetPos.z > -3)
+                    //{
+                    //    if (Input.GetMouseButton(0))
+                    //    {
+                    //        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].MainCards);
+                    //    }
+                    //    else
+                    //    {
+                    //        TempCard.ShowTempCard(rank, CardPosType.Main);
+                    //    }
+                    //}
+                    //else if (targetPos.z > 3 && targetPos.z < 7)
+                    //{
+                    //    if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
+                    //    {
+                    //        if (Input.GetMouseButton(0))
+                    //        {
+                    //            PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpLeftCards);
+                    //        }
+                    //        else
+                    //        {
+                    //            TempCard.ShowTempCard(rank, CardPosType.UpLeft);
+                    //        }
+                    //    }
+                    //    else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
+                    //    {
+                    //        if (Input.GetMouseButton(0))
+                    //        {
+                    //            PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpCenterCards);
+                    //        }
+                    //        else
+                    //        {
+                    //            TempCard.ShowTempCard(rank, CardPosType.UpCenter);
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        if (Input.GetMouseButton(0))
+                    //        {
+                    //            PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpRightCards);
+                    //        }
+                    //        else
+                    //        {
+                    //            TempCard.ShowTempCard(rank, CardPosType.UpRight);
+                    //        }
+                    //    }
+                    //}
+                    //else if (targetPos.z < -3 && targetPos.z > -7)
+                    //{
+                    //    if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
+                    //    {
+                    //        if (Input.GetMouseButton(0))
+                    //        {
+                    //            PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownLeftCards);
+                    //        }
+                    //        else
+                    //        {
+                    //            TempCard.ShowTempCard(rank, CardPosType.DownLeft);
+
+                    //        }
+                    //    }
+                    //    else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
+                    //    {
+                    //        if (Input.GetMouseButton(0))
+                    //        {
+                    //            PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownCenterCards);
+                    //        }
+                    //        else
+                    //        {
+                    //            TempCard.ShowTempCard(rank, CardPosType.DownCenter);
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        if (Input.GetMouseButton(0))
+                    //        {
+                    //            PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownRightCards);
+                    //        }
+                    //        else
+                    //        {
+                    //            TempCard.ShowTempCard(rank, CardPosType.DownRight);
+                    //        }
+                    //    }
+                    //}
                 }
             }
-            await Task.Delay(10);
+            await Task.Delay(5);
         }
         Debug.Log("部署位置选择完毕");
         Battle.TempCardModel.SetActive(false);
@@ -232,10 +325,10 @@ class GameProgress : MonoBehaviour
         //所有卡牌设为不可激活
         Battle.GetAllCardList().ForEach(card => card.SetAllRoadSIgnsCannotClick());
         //////////////////////////////////////////判断哪些牌可激活///////////////////////
-        //当卡牌在主区时
         var currentCard = Chara.BelongCard;
-        List<(bool isEqual, Card, RoadSignPos)> command = new List<(bool, Card, RoadSignPos)>();
+        List<(bool isEqual, Card targetCard, RoadSignPos targetRoadSignPos)> command = new List<(bool, Card, RoadSignPos)>();
         bool isClickable;
+        //当卡牌在主区时
         if (currentCard.currentCardPosType == CardPosType.Main)
         {
             //判断主路线下一张卡
@@ -269,21 +362,174 @@ class GameProgress : MonoBehaviour
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
                 command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
             }
-        }
-        if (command.Count(x => x.isEqual) > 0)
-        {
-            while (SeletSelectMovementCard == null)
+
+            //判断下左侧卡
+            targetCard = currentCard.BelongCardRegoin.GetCard(CardPosType.DownLeft);
+            if (targetCard != null)
             {
-                await Task.Delay(100);
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpRight, currentCard.GetRoadSignColor(RoadSignPos.DownLeft));
+                command.Add((isClickable, targetCard, RoadSignPos.UpRight));
             }
+            //判断下右测卡
+            targetCard = currentCard.BelongCardRegoin.GetCard(CardPosType.DownRight);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.DownLeft));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+            }
+            //判断下张卡的下中间卡
+            targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin().GetCard(CardPosType.DownCenter);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+            }
+        }
+        //当卡牌在左上区时
+        if (currentCard.currentCardPosType == CardPosType.UpLeft)
+        {
+            //判断主路线下一张卡的右上卡
+            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.UpRight);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
+                command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
+            }
+            //判断当前卡的中间卡
+            targetCard = currentCard.BelongCardRegoin.GetCard(CardPosType.Main);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpRight, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
+                command.Add((isClickable, targetCard, RoadSignPos.UpRight));
+            }
+        }
+
+        //当卡牌在左下区时
+        if (currentCard.currentCardPosType == CardPosType.DownLeft)
+        {
+            //判断主路线下一张卡的右下卡
+            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.DownRight);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
+                command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
+            }
+            //判断当前卡的中间卡
+            targetCard = currentCard.BelongCardRegoin.GetCard(CardPosType.Main);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownRight, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
+                command.Add((isClickable, targetCard, RoadSignPos.DownRight));
+            }
+        }
+
+        //当卡牌在右上区时
+        if (currentCard.currentCardPosType == CardPosType.UpRight)
+        {
+            //判断主路线下一张卡的右上卡
+            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetNetCardRegoin()?.GetCard(CardPosType.UpLeft);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
+                command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
+            }
+            //判断当前卡的中间卡
+            targetCard = currentCard.BelongCardRegoin.GetCard(CardPosType.Main);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.DownLeft));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+            }
+        }
+
+        //当卡牌在右下区时
+        if (currentCard.currentCardPosType == CardPosType.DownRight)
+        {
+            //判断主路线下一张卡的左下卡
+            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetNetCardRegoin()?.GetCard(CardPosType.DownLeft);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
+                command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
+            }
+            //判断当前卡的中间卡
+            targetCard = currentCard.BelongCardRegoin.GetCard(CardPosType.Main);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.UpLeft));
+                command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
+            }
+        }
+
+        //当卡牌在中上区时
+        if (currentCard.currentCardPosType == CardPosType.UpCenter)
+        {
+            //判断主路线下一张卡的中间卡
+            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.Main);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
+                command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
+            }
+        }
+
+        //当卡牌在中下区时
+        if (currentCard.currentCardPosType == CardPosType.DownCenter)
+        {
+            //判断主路线上一张卡的中间卡
+            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.Main);
+            if (targetCard != null)
+            {
+                isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
+                command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
+            }
+        }
+
+
+        int colorEqualCount = command.Count(x => x.isEqual);
+        Debug.Log(colorEqualCount);
+        if (colorEqualCount > 0)
+        {
+            //自动移动
+            if (colorEqualCount == 1)
+            {
+                var targetCommand = command.First(x => x.isEqual);
+                SeletSelectMovementCard = targetCommand.targetCard;
+            }
+            else
+            {
+                while (SeletSelectMovementCard == null)
+                {
+                    await Task.Delay(100);
+                }
+            }
+            var targetRegoin = Chara.BelongCard.BelongCardRegoin;
+            var targetCardPosType = Chara.BelongCard.currentCardPosType;
+            await Task.Delay(1000);
             Chara.Instanc.SetRoad(SeletSelectMovementCard);
             Chara.Instanc.Settlement();
+            Battle.GetAllCardList().ForEach(card => card.ReSetColor());
+            await Task.Delay(2000);
+            targetRegoin.Recycle(targetCardPosType);
+
+
         }
         else
         {
-
+            Battle.GetAllCardList().ForEach(card => card.ReSetColor());
         }
-        Battle.GetAllCardList().ForEach(card => card.ReSetColor());
         Debug.Log("移动位置选择完毕");
         SeletSelectMovementCard = null;
         await Task.Delay(100);

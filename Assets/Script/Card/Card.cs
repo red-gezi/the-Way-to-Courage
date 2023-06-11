@@ -71,21 +71,6 @@ public partial class Card : MonoBehaviour
     public List<Texture2D> colorTex;
     //四个角的颜色,依次是左上 右上 右下 左下
     public CardColor[] colors = new CardColor[4];
-
-    //CardColor[] CurrentColors
-    //{
-    //    get
-    //    {
-    //        if (IsOnMainRoad)
-    //        {
-    //            return IsUpRight ? new CardColor[] { colors[2], colors[3], colors[0], colors[1] } : new CardColor[] { colors[0], colors[1], colors[2], colors[3] };
-    //        }
-    //        else
-    //        {
-    //            return IsUpRight ? new CardColor[] { colors[3], colors[0], colors[1], colors[2] } : new CardColor[] { colors[1], colors[2], colors[3], colors[0] };
-    //        }
-    //    }
-    //}
     Vector3 targetPos = Vector3.zero;
     Vector3 targetEuler = Vector3.zero;
 
@@ -109,7 +94,7 @@ public partial class Card : MonoBehaviour
 
                 targetPos = new Vector3(31, 0, -11);
                 targetEuler = new Vector3(0, 45, 0);
-                transform.position = targetPos;
+                //transform.position = targetPos;
                 break;
             case CardState.OnHand:
                 float x = Mathf.Lerp(10, 20, 1f / (Battle.HandCards.Count - 1) * HandRank);
@@ -355,7 +340,7 @@ public partial class Card : MonoBehaviour
         int[] index = new int[] { (0 + bias) % 4, (1 + bias) % 4, (2 + bias) % 4, (3 + bias) % 4 };
         CardColor targetColor = GetRoadSignColor(roadSignPos);
         bool isColorEqual = targetColor == currentColor;
-        transform.GetChild(index[(int)roadSignPos]+1).GetComponent<RoadSign>().SetCanClick(isColorEqual);
+        transform.GetChild(index[(int)roadSignPos] + 1).GetComponent<RoadSign>().SetCanClick(isColorEqual);
         return isColorEqual;
     }
 }
