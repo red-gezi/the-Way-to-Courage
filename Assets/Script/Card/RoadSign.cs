@@ -6,7 +6,6 @@ public class RoadSign : MonoBehaviour
     public Color currentColor { get; set; }
     private void OnMouseUp()
     {
-        Debug.Log("按钮点击");
         if (IsCanClick)
         {
             GameProgress.SeletSelectMovementCard = transform.parent.GetComponent<Card>();

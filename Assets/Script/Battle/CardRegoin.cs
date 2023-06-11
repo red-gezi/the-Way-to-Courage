@@ -28,7 +28,20 @@ public class CardRegoin
     }
 
     public List<Card> GetAllCardList() => new List<List<Card>> { MainCards, UpLeftCards, UpCenterCards, UpRightCards, DownLeftCards, DownCenterCards, DownRightCards }.SelectMany(x => x).ToList();
-    public CardRegoin GetNetCardRegoin()
+
+    public CardRegoin GetLastCardRegoin()
+    {
+        int index = Battle.MainRoadRegoins.IndexOf(this);
+        if (index >1)
+        {
+            return Battle.MainRoadRegoins[index - 1];
+        }
+        else
+        {
+            return new CardRegoin();
+        }
+    }
+    public CardRegoin GetNextCardRegoin()
     {
         int index = Battle.MainRoadRegoins.IndexOf(this);
         if (index < Battle.maxMainRoadCount - 1)
@@ -37,7 +50,7 @@ public class CardRegoin
         }
         else
         {
-            return null;
+            return new CardRegoin();
         }
     }
     public void Recycle(CardPosType cardPosType)

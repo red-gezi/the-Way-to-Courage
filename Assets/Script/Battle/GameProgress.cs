@@ -137,91 +137,305 @@ class GameProgress : MonoBehaviour
                 if (targetPos.x > -2 && targetPos.x < (Battle.maxMainRoadCount - 1) * 4 + 2)
                 {
                     int rank = (int)(targetPos.x + 2) / 4;
+                    CardPosType cardPosType = CardPosType.None;
                     if (targetPos.z < 3 && targetPos.z > -3)
                     {
-                        if (Input.GetMouseButton(0))
-                        {
-                            PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].MainCards);
-                        }
-                        else
-                        {
-                            TempCard.ShowTempCard(rank, CardPosType.Main);
-                        }
+                        cardPosType = CardPosType.Main;
                     }
                     else if (targetPos.z > 3 && targetPos.z < 7)
                     {
                         if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
                         {
-                            if (Input.GetMouseButton(0))
-                            {
-                                PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpLeftCards);
-                            }
-                            else
-                            {
-                                TempCard.ShowTempCard(rank, CardPosType.UpLeft);
-                            }
+                            cardPosType = CardPosType.UpLeft;
                         }
                         else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
                         {
-                            if (Input.GetMouseButton(0))
-                            {
-                                PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpCenterCards);
-                            }
-                            else
-                            {
-                                TempCard.ShowTempCard(rank, CardPosType.UpCenter);
-                            }
+                            cardPosType = CardPosType.UpCenter;
                         }
                         else
                         {
-                            if (Input.GetMouseButton(0))
-                            {
-                                PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].UpRightCards);
-                            }
-                            else
-                            {
-                                TempCard.ShowTempCard(rank, CardPosType.UpRight);
-                            }
+                            cardPosType = CardPosType.UpRight;
                         }
                     }
                     else if (targetPos.z < -3 && targetPos.z > -7)
                     {
                         if ((targetPos.x + 2) % 4 / 4 < 1f / 3)
                         {
-                            if (Input.GetMouseButton(0))
-                            {
-                                PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownLeftCards);
-                            }
-                            else
-                            {
-                                TempCard.ShowTempCard(rank, CardPosType.DownLeft);
-
-                            }
+                            cardPosType = CardPosType.DownLeft;
                         }
                         else if ((targetPos.x + 2) % 4 / 4 < 2f / 3)
                         {
-                            if (Input.GetMouseButton(0))
+                            cardPosType = CardPosType.DownCenter;
+                        }
+                        else
+                        {
+                            cardPosType = CardPosType.DownRight;
+                        }
+                    }
+                    if (Input.GetMouseButton(0))
+                    {
+                        if (cardPosType != CardPosType.None)
+                        {
+                            //做部署有效性判断
+
+                            ////部署在主路时
+                            //if (cardPosType== CardPosType.Main)
+                            //{
+                            //    if (Battle.MainRoadRegoins[rank]==Chara.BelongCard.BelongCardRegoin)
+                            //    {
+                            //        Debug.LogError("无法放置卡牌到人物脚下");
+                            //    }
+                            //    else
+                            //    {
+                            //        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                            //    }
+                            //}
+                            if (Battle.MainRoadRegoins[rank].GetCardList(cardPosType).Contains(Chara.BelongCard))
                             {
-                                PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownCenterCards);
+                                Debug.LogError("无法放置卡牌到人物脚下");
                             }
                             else
                             {
-                                TempCard.ShowTempCard(rank, CardPosType.DownCenter);
+                                if (cardPosType == CardPosType.Main)
+                                {
+                                    PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                                }
+                                //部署在上左位置时
+                                if (cardPosType == CardPosType.UpLeft)
+                                {
+                                    if (Battle.MainRoadRegoins[rank].UpCenterCards.Any())
+                                    {
+                                        Debug.LogError("本区域中侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].UpRightCards.Any())
+                                    {
+                                        Debug.LogError("本区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpLeftCards.Any()))
+                                    {
+                                        Debug.LogError("左区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpCenterCards.Any()))
+                                    {
+                                        Debug.LogError("左区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpRightCards.Any()))
+                                    {
+                                        Debug.LogError("左区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpLeftCards.Any())
+                                    {
+                                        Debug.LogError("右区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpCenterCards.Any())
+                                    {
+                                        Debug.LogError("右区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else
+                                    {
+                                        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                                    }
+                                }
+                                //部署在下左位置时
+                                if (cardPosType == CardPosType.DownLeft)
+                                {
+                                    if (Battle.MainRoadRegoins[rank].DownCenterCards.Any())
+                                    {
+                                        Debug.LogError("本区域中侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].DownRightCards.Any())
+                                    {
+                                        Debug.LogError("本区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownLeftCards.Any()))
+                                    {
+                                        Debug.LogError("左区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownCenterCards.Any()))
+                                    {
+                                        Debug.LogError("左区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownRightCards.Any()))
+                                    {
+                                        Debug.LogError("左区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownLeftCards.Any())
+                                    {
+                                        Debug.LogError("右区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownCenterCards.Any())
+                                    {
+                                        Debug.LogError("右区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else
+                                    {
+                                        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                                    }
+                                }
+                                //部署在上右位置时
+                                if (cardPosType == CardPosType.UpRight)
+                                {
+                                    if (Battle.MainRoadRegoins[rank].UpLeftCards.Any())
+                                    {
+                                        Debug.LogError("本区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].UpCenterCards.Any())
+                                    {
+                                        Debug.LogError("本区域中侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpCenterCards.Any()))
+                                    {
+                                        Debug.LogError("左区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpRightCards.Any()))
+                                    {
+                                        Debug.LogError("左区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpLeftCards.Any())
+                                    {
+                                        Debug.LogError("右区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpCenterCards.Any())
+                                    {
+                                        Debug.LogError("右区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpRightCards.Any()))
+                                    {
+                                        Debug.LogError("右区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else
+                                    {
+                                        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                                    }
+                                }
+                                //部署在下右位置时
+                                if (cardPosType == CardPosType.DownRight)
+                                {
+                                    if (Battle.MainRoadRegoins[rank].DownLeftCards.Any())
+                                    {
+                                        Debug.LogError("本区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].DownCenterCards.Any())
+                                    {
+                                        Debug.LogError("本区域中侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownCenterCards.Any()))
+                                    {
+                                        Debug.LogError("左区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownRightCards.Any()))
+                                    {
+                                        Debug.LogError("左区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownLeftCards.Any())
+                                    {
+                                        Debug.LogError("右区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownCenterCards.Any())
+                                    {
+                                        Debug.LogError("右区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownRightCards.Any()))
+                                    {
+                                        Debug.LogError("右区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else
+                                    {
+                                        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                                    }
+                                }
+                                //部署在上中位置时
+                                if (cardPosType == CardPosType.UpCenter)
+                                {
+                                    if (Battle.MainRoadRegoins[rank].UpLeftCards.Any())
+                                    {
+                                        Debug.LogError("本区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].UpRightCards.Any())
+                                    {
+                                        Debug.LogError("本区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpLeftCards.Any()))
+                                    {
+                                        Debug.LogError("左区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpCenterCards.Any()))
+                                    {
+                                        Debug.LogError("左区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().UpRightCards.Any()))
+                                    {
+                                        Debug.LogError("左区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpLeftCards.Any())
+                                    {
+                                        Debug.LogError("右区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpCenterCards.Any())
+                                    {
+                                        Debug.LogError("右区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetNextCardRegoin().UpRightCards.Any()))
+                                    {
+                                        Debug.LogError("右区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else
+                                    {
+                                        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                                    }
+                                }
+                                //部署在下中位置时
+                                if (cardPosType == CardPosType.DownCenter)
+                                {
+                                    if (Battle.MainRoadRegoins[rank].DownLeftCards.Any())
+                                    {
+                                        Debug.LogError("本区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].DownRightCards.Any())
+                                    {
+                                        Debug.LogError("本区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownLeftCards.Any()))
+                                    {
+                                        Debug.LogError("左区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownCenterCards.Any()))
+                                    {
+                                        Debug.LogError("左区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetLastCardRegoin().DownRightCards.Any()))
+                                    {
+                                        Debug.LogError("左区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownLeftCards.Any())
+                                    {
+                                        Debug.LogError("右区域左侧已存在卡牌，无法覆盖");
+                                    }
+                                    else if (Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownCenterCards.Any())
+                                    {
+                                        Debug.LogError("右区域中间已存在卡牌，无法覆盖");
+                                    }
+                                    else if ((Battle.MainRoadRegoins[rank].GetNextCardRegoin().DownRightCards.Any()))
+                                    {
+                                        Debug.LogError("右区域右侧已存在卡牌，无法覆盖");
+                                    }
+                                    else
+                                    {
+                                        PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].GetCardList(cardPosType));
+                                    }
+                                }
+
                             }
                         }
                         else
                         {
-                            if (Input.GetMouseButton(0))
-                            {
-                                PrePlayCard.Deploy(rank, Battle.MainRoadRegoins[rank].DownRightCards);
-                            }
-                            else
-                            {
-                                TempCard.ShowTempCard(rank, CardPosType.DownRight);
-                            }
+                            Debug.Log("请选择一个可部署区域");
                         }
                     }
-
+                    else
+                    {
+                        TempCard.ShowTempCard(rank, cardPosType);
+                    }
                     //if (targetPos.z < 3 && targetPos.z > -3)
                     //{
                     //    if (Input.GetMouseButton(0))
@@ -332,7 +546,7 @@ class GameProgress : MonoBehaviour
         if (currentCard.currentCardPosType == CardPosType.Main)
         {
             //判断主路线下一张卡
-            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.Main);
+            var targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin()?.GetCard(CardPosType.Main);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
@@ -356,7 +570,7 @@ class GameProgress : MonoBehaviour
                 command.Add((isClickable, targetCard, RoadSignPos.DownLeft));
             }
             //判断上张卡的上中间卡
-            targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin().GetCard(CardPosType.UpCenter);
+            targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin().GetCard(CardPosType.UpCenter);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
@@ -378,7 +592,7 @@ class GameProgress : MonoBehaviour
                 command.Add((isClickable, targetCard, RoadSignPos.UpLeft));
             }
             //判断下张卡的下中间卡
-            targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin().GetCard(CardPosType.DownCenter);
+            targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin().GetCard(CardPosType.DownCenter);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
@@ -389,7 +603,7 @@ class GameProgress : MonoBehaviour
         if (currentCard.currentCardPosType == CardPosType.UpLeft)
         {
             //判断主路线下一张卡的右上卡
-            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.UpRight);
+            var targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin()?.GetCard(CardPosType.UpRight);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
@@ -411,7 +625,7 @@ class GameProgress : MonoBehaviour
         if (currentCard.currentCardPosType == CardPosType.DownLeft)
         {
             //判断主路线下一张卡的右下卡
-            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.DownRight);
+            var targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin()?.GetCard(CardPosType.DownRight);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
@@ -433,7 +647,7 @@ class GameProgress : MonoBehaviour
         if (currentCard.currentCardPosType == CardPosType.UpRight)
         {
             //判断主路线下一张卡的右上卡
-            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetNetCardRegoin()?.GetCard(CardPosType.UpLeft);
+            var targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin()?.GetNextCardRegoin()?.GetCard(CardPosType.UpLeft);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
@@ -455,7 +669,7 @@ class GameProgress : MonoBehaviour
         if (currentCard.currentCardPosType == CardPosType.DownRight)
         {
             //判断主路线下一张卡的左下卡
-            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetNetCardRegoin()?.GetCard(CardPosType.DownLeft);
+            var targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin()?.GetNextCardRegoin()?.GetCard(CardPosType.DownLeft);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
@@ -477,7 +691,7 @@ class GameProgress : MonoBehaviour
         if (currentCard.currentCardPosType == CardPosType.UpCenter)
         {
             //判断主路线下一张卡的中间卡
-            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.Main);
+            var targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin()?.GetCard(CardPosType.Main);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.UpLeft, currentCard.GetRoadSignColor(RoadSignPos.DownRight));
@@ -489,7 +703,7 @@ class GameProgress : MonoBehaviour
         if (currentCard.currentCardPosType == CardPosType.DownCenter)
         {
             //判断主路线上一张卡的中间卡
-            var targetCard = currentCard.BelongCardRegoin.GetNetCardRegoin()?.GetCard(CardPosType.Main);
+            var targetCard = currentCard.BelongCardRegoin.GetNextCardRegoin()?.GetCard(CardPosType.Main);
             if (targetCard != null)
             {
                 isClickable = targetCard.SetRoadSIgnClickable(RoadSignPos.DownLeft, currentCard.GetRoadSignColor(RoadSignPos.UpRight));
@@ -499,7 +713,7 @@ class GameProgress : MonoBehaviour
 
 
         int colorEqualCount = command.Count(x => x.isEqual);
-        Debug.Log(colorEqualCount);
+        Debug.Log("可选择路径数" + colorEqualCount);
         if (colorEqualCount > 0)
         {
             //自动移动
@@ -517,7 +731,7 @@ class GameProgress : MonoBehaviour
             }
             var targetRegoin = Chara.BelongCard.BelongCardRegoin;
             var targetCardPosType = Chara.BelongCard.currentCardPosType;
-            await Task.Delay(1000);
+            await Task.Delay(500);
             Chara.Instanc.SetRoad(SeletSelectMovementCard);
             Chara.Instanc.Settlement();
             Battle.GetAllCardList().ForEach(card => card.ReSetColor());
