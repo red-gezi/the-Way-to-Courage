@@ -217,15 +217,21 @@ public partial class Card : MonoBehaviour
     }
     private void OnMouseUp()
     {
+        Debug.Log(Input.mousePosition.y);
         if (GameProgress.PrePlayCard == this)
         {
             //如果在屏幕下方松手，放回手牌，如果在屏幕上方松手，打出
-            if (true)
+            if (Input.mousePosition.y/Screen.height>0.3)
             {
                 currentCardState = CardState.AfterPlay;
                 GameProgress.IsWaitForPlayCard = false;
                 GameProgress.IsPlayCardOver = true;
                 Battle.HandCards.Remove(this);
+            }
+            else
+            {
+                currentCardState = CardState.OnHand;
+                GameProgress.PrePlayCard = null;
             }
         }
     }
